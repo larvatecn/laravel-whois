@@ -22,6 +22,7 @@ use Iodev\Whois\Helpers\DomainHelper;
  * @property array $name_servers NS服务器
  * @property Carbon $creation_date
  * @property Carbon $expiration_date
+ * @property string $raw_data
  * @property Carbon $created_at 创建时间
  * @property Carbon $updated_at 更新时间
  *
@@ -66,7 +67,7 @@ class Domain extends Model
      */
     public $fillable = [
         'name', 'owner', 'registrar', 'whois_server', 'states', 'name_servers', 'creation_date', 'expiration_date',
-        'raw'
+        'raw_data'
     ];
 
     /**
@@ -78,8 +79,16 @@ class Domain extends Model
         return DomainHelper::toUnicode($this->name);
     }
 
-    public function refresh()
+    /**
+     * 查询缓存的Whois信息
+     * @param string $domain
+     * @return false|\Illuminate\Database\Eloquent\Builder|Model|object|null
+     */
+    public static function getDomainInfo(string $domain)
     {
-
+        if (($info = static::query()->where('domain', $domain)->first()) != null) {
+            return $info;
+        }
+        return false;
     }
 }

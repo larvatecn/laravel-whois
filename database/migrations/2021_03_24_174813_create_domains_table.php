@@ -23,7 +23,7 @@ class CreateDomainsTable extends Migration
             $table->json('name_servers')->nullable()->comment('元数据');
             $table->timestamp('creation_date')->nullable();
             $table->timestamp('expiration_date')->nullable();
-            $table->mediumText('raw')->comment('Raw Data');
+            $table->mediumText('raw_data')->comment('Raw Data');
             $table->timestamps();
         });
     }

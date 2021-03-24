@@ -14,6 +14,7 @@ use Iodev\Whois\Factory;
 use Iodev\Whois\Exceptions\ConnectionException;
 use Iodev\Whois\Exceptions\ServerMismatchException;
 use Iodev\Whois\Exceptions\WhoisException;
+use Larva\GeoIP\Models\GeoIPModel;
 
 /**
  * Class WhoisQuery
@@ -41,14 +42,14 @@ class WhoisQuery
      * @param \Illuminate\Contracts\Container\Container $container
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-        $this->config = $container->make('config');
-    }
+//    public function __construct(Container $container)
+//    {
+//        $this->container = $container;
+//        $this->config = $container->make('config');
+//    }
 
     /**
-     * 查询原始Whois
+     * 查询原始 Whois
      * @param string $domain
      * @return false|string
      */
@@ -57,44 +58,53 @@ class WhoisQuery
         // Creating default configured client
         $whois = Factory::get()->createWhois();
         try {
-            $response =  $whois->lookupDomain($domain);
+            $response = $whois->lookupDomain($domain);
             return $response->text;
         } catch (\Exception $e) {
             return false;
         }
     }
 
-    public function lookup($domain, $refresh = false)
+    /**
+     * 查询 Whois Info
+     * @param string $domain
+     * @return false|\Iodev\Whois\Modules\Tld\TldInfo
+     */
+    public function lookupInfo(string $domain)
     {
-        if ($refresh == false) {
-            $info = Domain::query()->where('domain', $domain)->first();
-            if ($info) {
-                return $info;
-            }
-        }
         try {
             // Creating default configured client
             $whois = Factory::get()->createWhois();
             // Getting parsed domain info
-            $info = $whois->loadDomainInfo($domain);
-            return [
-                'domainName' => $info->domainName,
-                'DomainNameUnicode' => $info->getDomainNameUnicode(),
-                'registrar' => $info->registrar,
-                'whoisServer' => $info->whoisServer,
-                'nameServers' => $info->nameServers,
-                'states' => $info->states,
-                'owner' => $info->owner,
-                'creationDate' => Carbon::createFromTimestamp($info->creationDate),
-                'expirationDate' => Carbon::createFromTimestamp($info->expirationDate),
-                'raw' => $info->getResponse()->text,
-            ];
-        } catch (ConnectionException $e) {
-            $msg = 'Disconnect or connection timeout';
-        } catch (ServerMismatchException $e) {
-            $msg = 'TLD server (.com for google.com) not found in current server hosts';
-        } catch (WhoisException $e) {
-            $msg = "Whois server responded with error '{$e->getMessage()}'";
+            return $whois->loadDomainInfo($domain);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 查询 Whois
+     * @param string $domain
+     * @param false $refresh
+     * @return array|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object
+     */
+    public function lookup(string $domain, $refresh = false)
+    {
+        if ($refresh == false && ($info = Domain::getDomainInfo($domain)) != false) {
+            return $info;
+        } else {
+            $response = $this->lookupInfo($domain);
+            return Domain::updateOrCreate([
+                'name' => $response->domainName,
+                'registrar' => $response->registrar,
+                'owner' => $response->owner,
+                'whois_server' => $response->whoisServer,
+                'states' => $response->states,
+                'name_servers' => $response->nameServers,
+                'creation_date' => Carbon::createFromTimestamp($response->creationDate),
+                'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
+                'raw_data' => $response->getResponse()->text,
+            ]);
         }
     }
 }

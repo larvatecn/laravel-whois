@@ -36,8 +36,8 @@ class WhoisServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(WhoisQuery::class, function ($app) {
-            return new WhoisQuery($app);
+        $this->app->singleton(WhoisQuery::class, function () {
+            return new WhoisQuery();
         });
     }
 }

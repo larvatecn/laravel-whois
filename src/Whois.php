@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * Class Whois
- * @method static \Larva\Whois\WhoisQuery lookup(string $domain)
+ * @method static \Iodev\Whois\Modules\Tld\TldInfo lookup(string $domain)
  * @method static array lookupRaw(string $domain)
+ * @method static \Larva\Whois\WhoisQuery lookupInfo(string $domain, $refresh = false)
  * @see \Larva\Whois\WhoisQuery
  *
  * @author Tongle Xu <xutongle@gmail.com>

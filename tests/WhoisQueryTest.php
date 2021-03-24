@@ -21,11 +21,11 @@ class WhoisQueryTest extends TestCase
         $this->assertIsString($result);
     }
 
-    public function testLookup()
+    public function testLookupInfo()
     {
-        $doamin = 'tintsoft.com';
+        $doamin = 'qq.com';
         $whois = new WhoisQuery();
-        $result = $whois->lookup($doamin);
-        print_r($result);
+        $result = $whois->lookupInfo($doamin);
+        $this->assertIsString($result->getResponse()->text);
     }
 }
