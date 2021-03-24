@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * Class Whois
- * @method static \Larva\Whois\WhoisQuery get(string $ip = '')
- * @method static array getRaw(string $ip = '')
+ * @method static \Larva\Whois\WhoisQuery lookup(string $domain)
+ * @method static array lookupRaw(string $domain)
  * @see \Larva\Whois\WhoisQuery
  *
  * @author Tongle Xu <xutongle@gmail.com>
