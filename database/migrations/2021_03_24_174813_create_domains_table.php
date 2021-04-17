@@ -20,11 +20,11 @@ class CreateDomainsTable extends Migration
             $table->string('registrar')->comment('注册服务商');
             $table->string('whois_server')->nullable()->comment('whois 服务器');
             $table->json('states')->comment('域名状态');
-            $table->json('name_servers')->nullable()->comment('元数据');
+            $table->json('name_servers')->nullable()->comment('DNS服务器');
             $table->timestamp('creation_date')->nullable();
             $table->timestamp('expiration_date')->nullable();
             $table->mediumText('raw_data')->comment('Raw Data');
-            $table->timestamps();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 

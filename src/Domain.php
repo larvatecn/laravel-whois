@@ -22,16 +22,17 @@ use Iodev\Whois\Helpers\DomainHelper;
  * @property array $name_servers NS服务器
  * @property Carbon $creation_date
  * @property Carbon $expiration_date
- * @property string $raw_data
- * @property Carbon $created_at 创建时间
+ * @property string $raw_data 原始数据
  * @property Carbon $updated_at 更新时间
  *
  * @property-read string $nameUnicode
+ * @method static updateOrCreate(array $parameters, array $attributes)
  *
  * @author Tongle Xu <xutongle@gmail.com>
  */
 class Domain extends Model
 {
+    const CREATED_AT = null;
     /**
      * The table associated with the model.
      *
@@ -57,7 +58,6 @@ class Domain extends Model
     protected $dates = [
         'creation_date',
         'expiration_date',
-        'created_at',
         'updated_at',
     ];
 
@@ -74,7 +74,7 @@ class Domain extends Model
      * 获取格式化后的文件大小
      * @return string
      */
-    public function getNameUnicodeAttribute()
+    public function getNameUnicodeAttribute(): string
     {
         return DomainHelper::toUnicode($this->name);
     }
@@ -82,11 +82,11 @@ class Domain extends Model
     /**
      * 查询缓存的Whois信息
      * @param string $domain
-     * @return false|\Illuminate\Database\Eloquent\Builder|Model|object|null
+     * @return false|Domain
      */
     public static function getDomainInfo(string $domain)
     {
-        if (($info = static::query()->where('domain', $domain)->first()) != null) {
+        if (($info = static::where('domain', $domain)->first()) != null) {
             return $info;
         }
         return false;

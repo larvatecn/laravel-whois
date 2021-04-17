@@ -11,10 +11,6 @@ namespace Larva\Whois;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Carbon;
 use Iodev\Whois\Factory;
-use Iodev\Whois\Exceptions\ConnectionException;
-use Iodev\Whois\Exceptions\ServerMismatchException;
-use Iodev\Whois\Exceptions\WhoisException;
-use Larva\GeoIP\Models\GeoIPModel;
 
 /**
  * Class WhoisQuery
@@ -86,7 +82,7 @@ class WhoisQuery
      * 查询 Whois
      * @param string $domain
      * @param false $refresh
-     * @return array|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object
+     * @return Domain|false
      */
     public function lookup(string $domain, $refresh = false)
     {
@@ -94,17 +90,22 @@ class WhoisQuery
             return $info;
         } else {
             $response = $this->lookupInfo($domain);
-            return Domain::updateOrCreate([
-                'name' => $response->domainName,
-                'registrar' => $response->registrar,
-                'owner' => $response->owner,
-                'whois_server' => $response->whoisServer,
-                'states' => $response->states,
-                'name_servers' => $response->nameServers,
-                'creation_date' => Carbon::createFromTimestamp($response->creationDate),
-                'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
-                'raw_data' => $response->getResponse()->text,
-            ]);
+            if($response){
+                return Domain::updateOrCreate([
+                    'name' => $response->domainName,
+                ],[
+                    'registrar' => $response->registrar,
+                    'owner' => $response->owner,
+                    'whois_server' => $response->whoisServer,
+                    'states' => $response->states,
+                    'name_servers' => $response->nameServers,
+                    'creation_date' => Carbon::createFromTimestamp($response->creationDate),
+                    'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
+                    'raw_data' => $response->getResponse()->text,
+                ]);
+            } else {
+                return false;
+            }
         }
     }
 }
