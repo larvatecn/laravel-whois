@@ -12,10 +12,18 @@ use Larva\Whois\WhoisQuery;
 
 class WhoisQueryTest extends TestCase
 {
+    public function testParseDomain()
+    {
+        $doamin = 'www.china.com.cn';
+        $whois = new WhoisQuery();
+        $result = $whois->parseDomain($doamin);
+        print_r($result->registrableDomain()->toString());
+        $this->assertIsString($result);
+    }
 
     public function testLookupRaw()
     {
-        $doamin = 'google.com';
+        $doamin = 'www.google.com';
         $whois = new WhoisQuery();
         $result = $whois->lookupRaw($doamin);
         $this->assertIsString($result);
@@ -23,7 +31,7 @@ class WhoisQueryTest extends TestCase
 
     public function testLookupInfo()
     {
-        $doamin = 'qq.com';
+        $doamin = 'www.qq.com';
         $whois = new WhoisQuery();
         $result = $whois->lookupInfo($doamin);
         $this->assertIsString($result->getResponse()->text);

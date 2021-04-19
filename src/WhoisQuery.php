@@ -9,14 +9,15 @@
 namespace Larva\Whois;
 
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Iodev\Whois\Exceptions\ConnectionException;
 use Iodev\Whois\Exceptions\ServerMismatchException;
 use Iodev\Whois\Exceptions\WhoisException;
 use Iodev\Whois\Factory;
 use Iodev\Whois\Modules\Tld\TldInfo;
+use Pdp\ResolvedDomainName;
 use Pdp\Rules;
+use Pdp\Domain as WhoisDomain;
 
 /**
  * Class WhoisQuery
@@ -54,7 +55,7 @@ class WhoisQuery
      * 解析域名
      *
      * @param string $host
-     * @return bool|\Pdp\Domain
+     * @return false|ResolvedDomainName
      */
     public function parseDomain(string $host)
     {
@@ -65,7 +66,9 @@ class WhoisQuery
             }
         }
         if ($host && strpos($host, '.') !== false) {
-            return Rules::createFromString(__DIR__ . '/../resources/public_suffix_list.dat')->resolve($host);
+            $publicSuffixList = Rules::fromPath(__DIR__ . '/../resources/public_suffix_list.dat');
+            $domain = WhoisDomain::fromIDNA2008($host);
+            return $publicSuffixList->resolve($domain);
         }
         return false;
     }
@@ -86,7 +89,7 @@ class WhoisQuery
         } else {
             // Creating default configured client
             $whois = Factory::get()->createWhois();
-            return $whois->lookupDomain($domain->getRegistrableDomain())->text;
+            return $whois->lookupDomain($domain->registrableDomain()->toString())->text;
         }
     }
 
@@ -107,7 +110,11 @@ class WhoisQuery
         } else {
             // Creating default configured client
             $whois = Factory::get()->createWhois();
-            return $whois->loadDomainInfo($domain instanceof Domain ? $domain->getRegistrableDomain() : $domain);
+            if ($domain instanceof ResolvedDomainName) {
+                return $whois->loadDomainInfo($domain->registrableDomain()->toString());
+            } else {
+                return $whois->loadDomainInfo($domain);
+            }
         }
     }
 
@@ -126,10 +133,10 @@ class WhoisQuery
         if (($domain = $this->parseDomain($domain)) == false) {
             throw new IllegalDomainException("Illegal domain name");
         }
-        if ($refresh == false && ($info = Domain::getDomainInfo($domain->getRegistrableDomain())) != false) {
+        if ($refresh == false && ($info = Domain::getDomainInfo($domain->registrableDomain()->toString())) != false) {
             return $info;
         } else {
-            $response = $this->lookupInfo($domain->getRegistrableDomain(), false);
+            $response = $this->lookupInfo($domain->registrableDomain()->toString(), false);
             if (($info = Domain::getDomainInfo($response->domainName)) == false) {
                 $info = new Domain(['name' => $response->domainName]);
             }
