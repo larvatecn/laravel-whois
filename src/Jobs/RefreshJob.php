@@ -64,6 +64,6 @@ class RefreshJob implements ShouldQueue
      */
     public function handle()
     {
-        Whois::lookupInfo($this->domain, true);
+        Whois::lookup($this->domain, true);
     }
 }

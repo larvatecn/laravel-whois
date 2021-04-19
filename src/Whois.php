@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * Class Whois
  * @method static Domain lookup(string $domain, $refresh = false)
- * @method static array lookupRaw(string $domain)
+ * @method static string lookupRaw(string $domain)
  * @method static \Iodev\Whois\Modules\Tld\TldInfo lookupInfo(string $domain)
  * @see \Larva\Whois\WhoisQuery
  *
