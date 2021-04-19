@@ -34,17 +34,6 @@ use Iodev\Whois\Helpers\DomainHelper;
 class Domain extends Model
 {
 
-    /**
-     * 为数组 / JSON 序列化准备日期。
-     *
-     * @param \DateTimeInterface $date
-     * @return string
-     */
-    protected function serializeDate(\DateTimeInterface $date)
-    {
-        return $date->format($this->getDateFormat());
-    }
-    
     const CREATED_AT = null;
 
     /**
@@ -84,6 +73,17 @@ class Domain extends Model
         'raw_data'
     ];
 
+    /**
+     * 为数组 / JSON 序列化准备日期。
+     *
+     * @param \DateTimeInterface $date
+     * @return string
+     */
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format($this->getDateFormat());
+    }
+    
     /**
      * 获取域名Unicode
      * @return string
