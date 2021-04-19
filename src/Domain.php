@@ -27,7 +27,7 @@ use Iodev\Whois\Helpers\DomainHelper;
  * @property Carbon $updated_at 更新时间
  *
  * @property-read string $nameUnicode 域名Unicode
- * @method static updateOrCreate(array $parameters, array $attributes)
+ * @property-read string $rawHtml
  *
  * @author Tongle Xu <xutongle@gmail.com>
  */
@@ -91,6 +91,34 @@ class Domain extends Model
     public function getNameUnicodeAttribute(): string
     {
         return DomainHelper::toUnicode($this->name);
+    }
+
+    /**
+     * 已经注册的天数
+     * @return int
+     */
+    public function lifespanInDays(): int
+    {
+        return $this->creation_date->diffInDays(Carbon::now());
+    }
+
+    /**
+     * 获取剩余有效的天数
+     * @return int
+     */
+    public function daysUntilExpirationDate(): int
+    {
+        $interval = Carbon::now()->diff($this->expiration_date);
+        return (int)$interval->format('%r%a');
+    }
+
+    /**
+     * 获取 Whois HTML
+     * @return string
+     */
+    public function getRawHtmlAttribute(): string
+    {
+        return implode("<br>\n", explode("\n", $this->raw_data));
     }
 
     /**
