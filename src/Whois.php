@@ -11,11 +11,11 @@ namespace Larva\Whois;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class Whois
+ * Whois 查询
  * @method static Domain lookup(string $domain, $refresh = false)
  * @method static string lookupRaw(string $domain)
  * @method static \Iodev\Whois\Modules\Tld\TldInfo lookupInfo(string $domain)
- * @see \Larva\Whois\WhoisQuery
+ * @mixin \Larva\Whois\WhoisQuery
  *
  * @author Tongle Xu <xutongle@gmail.com>
  */

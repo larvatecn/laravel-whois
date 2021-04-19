@@ -11,6 +11,7 @@ namespace Larva\Whois;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Iodev\Whois\Helpers\DomainHelper;
+use Larva\Support\IPHelper;
 
 /**
  * Class Domain
@@ -28,6 +29,7 @@ use Iodev\Whois\Helpers\DomainHelper;
  *
  * @property-read string $nameUnicode 域名Unicode
  * @property-read string $rawHtml
+ * @property-read array $dnsServers
  *
  * @author Tongle Xu <xutongle@gmail.com>
  */
@@ -119,6 +121,19 @@ class Domain extends Model
     public function getRawHtmlAttribute(): string
     {
         return implode("<br>\n", explode("\n", $this->raw_data));
+    }
+
+    /**
+     * 获取 DNS 服务器
+     * @return array
+     */
+    public function getDnsServersAttribute(): array
+    {
+        $servers = [];
+        foreach ($this->name_servers as $name_server) {
+            $servers[$name_server] = IPHelper::getHostIpV4($name_server);
+        }
+        return $servers;
     }
 
     /**
