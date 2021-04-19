@@ -10,6 +10,7 @@ namespace Larva\Whois;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Iodev\Whois\Helpers\DomainHelper;
 use Larva\Support\IPHelper;
 
@@ -37,6 +38,8 @@ class Domain extends Model
 {
 
     const CREATED_AT = null;
+
+    const CACHE_TAG = 'domains:';
 
     /**
      * The table associated with the model.
@@ -147,5 +150,17 @@ class Domain extends Model
             return $info;
         }
         return false;
+    }
+
+    /**
+     * 获取缓存的总数
+     * @param int $cacheMinutes
+     * @return mixed
+     */
+    public static function getTotal($cacheMinutes = 60)
+    {
+        return Cache::remember(static::CACHE_TAG . 'total', Carbon::now()->addMinutes($cacheMinutes), function () {
+            return static::count();
+        });
     }
 }
