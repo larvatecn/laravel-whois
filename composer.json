@@ -12,7 +12,7 @@
     "illuminate/support": "^6.0 || ^7.0 || ^8.0",
     "illuminate/database": "^6.0 || ^7.0 || ^8.0",
     "illuminate/queue": "^6.0 || ^7.0 || ^8.0",
-    "larva/support": "^1.0",
+    "larva/support": "^1.1",
     "io-developer/php-whois": "^4.0"
   },
   "require-dev": {

@@ -10,6 +10,7 @@ namespace Larva\Whois;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Iodev\Whois\Factory;
 
 /**
@@ -74,6 +75,7 @@ class WhoisQuery
             // Getting parsed domain info
             return $whois->loadDomainInfo($domain);
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return false;
         }
     }
@@ -90,19 +92,21 @@ class WhoisQuery
             return $info;
         } else {
             $response = $this->lookupInfo($domain);
-            if($response){
-                return Domain::updateOrCreate([
-                    'name' => $response->domainName,
-                ],[
-                    'registrar' => $response->registrar,
-                    'owner' => $response->owner,
-                    'whois_server' => $response->whoisServer,
-                    'states' => $response->states,
-                    'name_servers' => $response->nameServers,
-                    'creation_date' => Carbon::createFromTimestamp($response->creationDate),
-                    'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
-                    'raw_data' => $response->getResponse()->text,
-                ]);
+            if ($response != false) {
+                if (($info = Domain::getDomainInfo($domain)) == false) {
+                    $info = new Domain(['name' => $domain]);
+                }
+                $info->registrar = $response->registrar;
+                $info->owner = $response->owner;
+                $info->whois_server = $response->whoisServer;
+                $info->states = $response->states;
+                $info->name_servers = $response->nameServers;
+                $info->creation_date = Carbon::createFromTimestamp($response->creationDate);
+                $info->expiration_date = Carbon::createFromTimestamp($response->expirationDate);
+                $info->raw_data = $response->getResponse()->text;
+                $info->saveQuietly();
+
+                return $info;
             } else {
                 return false;
             }

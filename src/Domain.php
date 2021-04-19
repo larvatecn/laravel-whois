@@ -16,7 +16,8 @@ use Iodev\Whois\Helpers\DomainHelper;
  * Class Domain
  * @property int $id
  * @property string $name 域名
- * @property string $registrar 所有者
+ * @property string $owner 所有者
+ * @property string $registrar 注册商
  * @property array $states 域名状态
  * @property string $whois_server whois 服务器
  * @property array $name_servers NS服务器
@@ -25,7 +26,7 @@ use Iodev\Whois\Helpers\DomainHelper;
  * @property string $raw_data 原始数据
  * @property Carbon $updated_at 更新时间
  *
- * @property-read string $nameUnicode
+ * @property-read string $nameUnicode 域名Unicode
  * @method static updateOrCreate(array $parameters, array $attributes)
  *
  * @author Tongle Xu <xutongle@gmail.com>
@@ -71,7 +72,7 @@ class Domain extends Model
     ];
 
     /**
-     * 获取格式化后的文件大小
+     * 获取域名Unicode
      * @return string
      */
     public function getNameUnicodeAttribute(): string
