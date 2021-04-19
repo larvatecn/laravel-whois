@@ -100,7 +100,7 @@ class WhoisQuery
      * @throws ServerMismatchException
      * @throws WhoisException
      */
-    public function lookupInfo(string $domain, $resolve = true): TldInfo
+    public function lookupInfo(string $domain, $resolve = true)
     {
         if ($resolve == true && ($domain = $this->parseDomain($domain)) == false) {
             throw new IllegalDomainException("Illegal domain name");
