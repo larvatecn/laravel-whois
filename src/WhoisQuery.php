@@ -141,7 +141,7 @@ class WhoisQuery
             $info->creation_date = Carbon::createFromTimestamp($response->creationDate);
             $info->expiration_date = Carbon::createFromTimestamp($response->expirationDate);
             $info->raw_data = $response->getResponse()->text;
-            $info->saveQuietly();
+            $info->save();
             return $info;
         }
     }
