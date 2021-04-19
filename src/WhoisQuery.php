@@ -93,15 +93,16 @@ class WhoisQuery
     /**
      * 查询 Whois Info
      * @param string $domain
+     * @param bool $resolve 是否解析域名
      * @return TldInfo
      * @throws ConnectionException
      * @throws IllegalDomainException
      * @throws ServerMismatchException
      * @throws WhoisException
      */
-    public function lookupInfo(string $domain): TldInfo
+    public function lookupInfo(string $domain, $resolve = true): TldInfo
     {
-        if (($domain = $this->parseDomain($domain)) == false) {
+        if ($resolve == true && ($domain = $this->parseDomain($domain)) == false) {
             throw new IllegalDomainException("Illegal domain name");
         } else {
             // Creating default configured client
@@ -122,10 +123,13 @@ class WhoisQuery
      */
     public function lookup(string $domain, $refresh = false): Domain
     {
-        if ($refresh == false && ($info = Domain::getDomainInfo($domain)) != false) {
+        if (($domain = $this->parseDomain($domain)) == false) {
+            throw new IllegalDomainException("Illegal domain name");
+        }
+        if ($refresh == false && ($info = Domain::getDomainInfo($domain->getRegistrableDomain())) != false) {
             return $info;
         } else {
-            $response = $this->lookupInfo($domain);
+            $response = $this->lookupInfo($domain->getRegistrableDomain(), false);
             if (($info = Domain::getDomainInfo($response->domainName)) == false) {
                 $info = new Domain(['name' => $response->domainName]);
             }
