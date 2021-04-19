@@ -9,9 +9,13 @@
 namespace Larva\Whois;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
+use Iodev\Whois\Exceptions\ConnectionException;
+use Iodev\Whois\Exceptions\ServerMismatchException;
+use Iodev\Whois\Exceptions\WhoisException;
 use Iodev\Whois\Factory;
+use Iodev\Whois\Modules\Tld\TldInfo;
 use Pdp\Rules;
 
 /**
@@ -47,17 +51,6 @@ class WhoisQuery
 //    }
 
     /**
-     * 域名后缀解析
-     * @param string $domain
-     * @return \Pdp\Domain
-     */
-    protected function Resolve(string $domain): \Pdp\Domain
-    {
-        $rules = Rules::createFromPath('../resources/public_suffix_list.dat');
-        return $rules->resolve($domain);
-    }
-
-    /**
      * 解析域名
      *
      * @param string $host
@@ -72,7 +65,7 @@ class WhoisQuery
             }
         }
         if ($host && strpos($host, '.') !== false) {
-            return static::Resolve($host);
+            return Rules::createFromString(__DIR__ . '/../resources/public_suffix_list.dat')->resolve($host);
         }
         return false;
     }
@@ -80,41 +73,40 @@ class WhoisQuery
     /**
      * 查询原始 Whois
      * @param string $domain
-     * @return false|string
+     * @return string
+     * @throws ConnectionException
+     * @throws IllegalDomainException
+     * @throws ServerMismatchException
+     * @throws WhoisException
      */
-    public function lookupRaw(string $domain)
+    public function lookupRaw(string $domain): string
     {
         if (($domain = $this->parseDomain($domain)) == false) {
-            return false;
-        }
-        // Creating default configured client
-        $whois = Factory::get()->createWhois();
-        try {
-            $response = $whois->lookupDomain($domain);
-            return $response->text;
-        } catch (\Exception $e) {
-            return false;
+            throw new IllegalDomainException("Illegal domain name");
+        } else {
+            // Creating default configured client
+            $whois = Factory::get()->createWhois();
+            return $whois->lookupDomain($domain)->text;
         }
     }
 
     /**
      * 查询 Whois Info
      * @param string $domain
-     * @return false|\Iodev\Whois\Modules\Tld\TldInfo
+     * @return TldInfo
+     * @throws ConnectionException
+     * @throws IllegalDomainException
+     * @throws ServerMismatchException
+     * @throws WhoisException
      */
-    public function lookupInfo(string $domain)
+    public function lookupInfo(string $domain): TldInfo
     {
         if (($domain = $this->parseDomain($domain)) == false) {
-            return false;
-        }
-        try {
+            throw new IllegalDomainException("Illegal domain name");
+        } else {
             // Creating default configured client
             $whois = Factory::get()->createWhois();
-            // Getting parsed domain info
             return $whois->loadDomainInfo($domain);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return false;
         }
     }
 
@@ -122,35 +114,31 @@ class WhoisQuery
      * 查询 Whois
      * @param string $domain
      * @param false $refresh
-     * @return Domain|false
+     * @return Domain
+     * @throws ConnectionException
+     * @throws IllegalDomainException
+     * @throws ServerMismatchException
+     * @throws WhoisException
      */
-    public function lookup(string $domain, $refresh = false)
+    public function lookup(string $domain, $refresh = false): Domain
     {
-        if (($domain = $this->parseDomain($domain)) == false) {
-            return false;
-        }
         if ($refresh == false && ($info = Domain::getDomainInfo($domain)) != false) {
             return $info;
         } else {
             $response = $this->lookupInfo($domain);
-            if ($response != false) {
-                if (($info = Domain::getDomainInfo($domain)) == false) {
-                    $info = new Domain(['name' => $domain]);
-                }
-                $info->registrar = $response->registrar;
-                $info->owner = $response->owner;
-                $info->whois_server = $response->whoisServer;
-                $info->states = $response->states;
-                $info->name_servers = $response->nameServers;
-                $info->creation_date = Carbon::createFromTimestamp($response->creationDate);
-                $info->expiration_date = Carbon::createFromTimestamp($response->expirationDate);
-                $info->raw_data = $response->getResponse()->text;
-                $info->saveQuietly();
-
-                return $info;
-            } else {
-                return false;
+            if (($info = Domain::getDomainInfo($domain)) == false) {
+                $info = new Domain(['name' => $domain]);
             }
+            $info->registrar = $response->registrar;
+            $info->owner = $response->owner;
+            $info->whois_server = $response->whoisServer;
+            $info->states = $response->states;
+            $info->name_servers = $response->nameServers;
+            $info->creation_date = Carbon::createFromTimestamp($response->creationDate);
+            $info->expiration_date = Carbon::createFromTimestamp($response->expirationDate);
+            $info->raw_data = $response->getResponse()->text;
+            $info->saveQuietly();
+            return $info;
         }
     }
 }
