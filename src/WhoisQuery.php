@@ -126,8 +126,8 @@ class WhoisQuery
             return $info;
         } else {
             $response = $this->lookupInfo($domain);
-            if (($info = Domain::getDomainInfo($domain)) == false) {
-                $info = new Domain(['name' => $domain]);
+            if (($info = Domain::getDomainInfo($response->domainName)) == false) {
+                $info = new Domain(['name' => $response->domainName]);
             }
             $info->registrar = $response->registrar;
             $info->owner = $response->owner;
