@@ -107,7 +107,7 @@ class WhoisQuery
         } else {
             // Creating default configured client
             $whois = Factory::get()->createWhois();
-            return $whois->loadDomainInfo($domain->getRegistrableDomain());
+            return $whois->loadDomainInfo($domain instanceof Domain ? $domain->getRegistrableDomain() : $domain);
         }
     }
 
