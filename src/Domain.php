@@ -83,7 +83,7 @@ class Domain extends Model
     {
         return $date->format($this->getDateFormat());
     }
-    
+
     /**
      * 获取域名Unicode
      * @return string
@@ -100,7 +100,7 @@ class Domain extends Model
      */
     public static function getDomainInfo(string $domain)
     {
-        if (($info = static::where('domain', $domain)->first()) != null) {
+        if (($info = static::where('name', $domain)->first()) != null) {
             return $info;
         }
         return false;
