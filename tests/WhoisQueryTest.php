@@ -17,8 +17,7 @@ class WhoisQueryTest extends TestCase
         $doamin = 'www.china.com.cn';
         $whois = new WhoisQuery();
         $result = $whois->parseDomain($doamin);
-        print_r($result->registrableDomain()->toString());
-        $this->assertIsString($result);
+        $this->assertTrue($result->registrableDomain()->toString() == 'china.com.cn');
     }
 
     public function testLookupRaw()

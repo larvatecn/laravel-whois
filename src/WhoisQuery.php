@@ -55,9 +55,10 @@ class WhoisQuery
      * 解析域名
      *
      * @param string $host
-     * @return false|ResolvedDomainName
+     * @return ResolvedDomainName
+     * @throws IllegalDomainException
      */
-    public function parseDomain(string $host)
+    public function parseDomain(string $host): ResolvedDomainName
     {
         if (strpos($host, '://') !== false) {
             $url = parse_url($host);
@@ -69,8 +70,9 @@ class WhoisQuery
             $publicSuffixList = Rules::fromPath(__DIR__ . '/../resources/public_suffix_list.dat');
             $domain = WhoisDomain::fromIDNA2008($host);
             return $publicSuffixList->resolve($domain);
+        } else {
+            throw new IllegalDomainException("Illegal domain name");
         }
-        return false;
     }
 
     /**
@@ -78,44 +80,33 @@ class WhoisQuery
      * @param string $domain
      * @return string
      * @throws ConnectionException
-     * @throws IllegalDomainException
      * @throws ServerMismatchException
      * @throws WhoisException
+     * @throws IllegalDomainException
      */
     public function lookupRaw(string $domain): string
     {
-        if (($domain = $this->parseDomain($domain)) == false) {
-            throw new IllegalDomainException("Illegal domain name");
-        } else {
-            // Creating default configured client
-            $whois = Factory::get()->createWhois();
-            return $whois->lookupDomain($domain->registrableDomain()->toString())->text;
-        }
+        $domain = $this->parseDomain($domain);
+        $whois = Factory::get()->createWhois();
+        return $whois->lookupDomain($domain->registrableDomain()->toString())->text;
     }
 
     /**
      * 查询 Whois Info
-     * @param string $domain
-     * @param bool $resolve 是否解析域名
+     * @param string|ResolvedDomainName $domain
      * @return TldInfo
      * @throws ConnectionException
-     * @throws IllegalDomainException
      * @throws ServerMismatchException
      * @throws WhoisException
+     * @throws IllegalDomainException
      */
-    public function lookupInfo(string $domain, $resolve = true)
+    public function lookupInfo($domain)
     {
-        if ($resolve == true && ($domain = $this->parseDomain($domain)) == false) {
-            throw new IllegalDomainException("Illegal domain name");
-        } else {
-            // Creating default configured client
-            $whois = Factory::get()->createWhois();
-            if ($domain instanceof ResolvedDomainName) {
-                return $whois->loadDomainInfo($domain->registrableDomain()->toString());
-            } else {
-                return $whois->loadDomainInfo($domain);
-            }
+        $whois = Factory::get()->createWhois();
+        if (!$domain instanceof ResolvedDomainName) {
+            $domain = $this->parseDomain($domain);
         }
+        return $whois->loadDomainInfo($domain->registrableDomain()->toString());
     }
 
     /**
@@ -130,13 +121,11 @@ class WhoisQuery
      */
     public function lookup(string $domain, $refresh = false): Domain
     {
-        if (($domain = $this->parseDomain($domain)) == false) {
-            throw new IllegalDomainException("Illegal domain name");
-        }
+        $domain = $this->parseDomain($domain);
         if ($refresh == false && ($info = Domain::getDomainInfo($domain->registrableDomain()->toString())) != false) {
             return $info;
         } else {
-            $response = $this->lookupInfo($domain->registrableDomain()->toString(), false);
+            $response = $this->lookupInfo($domain);
             if (($info = Domain::getDomainInfo($response->domainName)) == false) {
                 $info = new Domain(['name' => $response->domainName]);
             }
