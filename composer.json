@@ -38,9 +38,12 @@
         "Larva\\Whois\\WhoisServiceProvider"
       ],
       "aliases": {
-        "GeoIP": "Larva\\Whois\\Whois"
+        "Whois": "Larva\\Whois\\Whois"
       }
     }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
   },
   "prefer-stable": true
 }
