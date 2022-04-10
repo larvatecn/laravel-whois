@@ -11,7 +11,7 @@ Laravel 的 Whois 查询模块。
 
 ## 环境需求
 
-- PHP >= 7.2.5
+- PHP >= 8.0.2
 
 ## Installation
 

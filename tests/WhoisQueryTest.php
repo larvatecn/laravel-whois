@@ -14,25 +14,25 @@ class WhoisQueryTest extends TestCase
 {
     public function testParseDomain()
     {
-        $doamin = 'www.china.com.cn';
+        $domain = 'www.china.com.cn';
         $whois = new WhoisQuery();
-        $result = $whois->parseDomain($doamin);
+        $result = $whois->parseDomain($domain);
         $this->assertTrue($result->registrableDomain()->toString() == 'china.com.cn');
     }
 
     public function testLookupRaw()
     {
-        $doamin = 'www.google.com';
+        $domain = 'www.google.com';
         $whois = new WhoisQuery();
-        $result = $whois->lookupRaw($doamin);
+        $result = $whois->lookupRaw($domain);
         $this->assertIsString($result);
     }
 
     public function testLookupInfo()
     {
-        $doamin = 'www.qq.com';
+        $domain = 'www.qq.com';
         $whois = new WhoisQuery();
-        $result = $whois->lookupInfo($doamin);
+        $result = $whois->lookupInfo($domain);
         $this->assertIsString($result->getResponse()->text);
     }
 }

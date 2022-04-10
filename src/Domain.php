@@ -3,7 +3,6 @@
  * This is NOT a freeware, use is subject to license terms
  * @copyright Copyright (c) 2010-2099 Jinan Larva Information Technology Co., Ltd.
  * @link http://www.larva.com.cn/
- * @license http://www.larva.com.cn/license/
  */
 
 namespace Larva\Whois;
@@ -49,6 +48,15 @@ class Domain extends Model
     protected $table = 'domains';
 
     /**
+     * 允许批量赋值的属性
+     * @var array
+     */
+    public $fillable = [
+        'name', 'owner', 'registrar', 'whois_server', 'states', 'name_servers', 'creation_date', 'expiration_date',
+        'raw_data'
+    ];
+
+    /**
      * 属性类型转换
      *
      * @var array
@@ -56,26 +64,9 @@ class Domain extends Model
     protected $casts = [
         'name_servers' => 'array',
         'states' => 'array',
-    ];
-
-    /**
-     * 应该被调整为日期的属性
-     *
-     * @var array
-     */
-    protected $dates = [
-        'creation_date',
-        'expiration_date',
-        'updated_at',
-    ];
-
-    /**
-     * 允许批量赋值的属性
-     * @var array
-     */
-    public $fillable = [
-        'name', 'owner', 'registrar', 'whois_server', 'states', 'name_servers', 'creation_date', 'expiration_date',
-        'raw_data'
+        'creation_date' => 'datetime',
+        'expiration_date' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -100,6 +91,7 @@ class Domain extends Model
 
     /**
      * 已经注册的天数
+     *
      * @return int
      */
     public function lifespanInDays(): int
@@ -109,6 +101,7 @@ class Domain extends Model
 
     /**
      * 获取剩余有效的天数
+     *
      * @return int
      */
     public function daysUntilExpirationDate(): int
@@ -119,6 +112,7 @@ class Domain extends Model
 
     /**
      * 获取 Whois HTML
+     *
      * @return string
      */
     public function getRawHtmlAttribute(): string
@@ -128,6 +122,7 @@ class Domain extends Model
 
     /**
      * 获取 DNS 服务器
+     *
      * @return array
      */
     public function getDnsServersAttribute(): array
@@ -141,26 +136,27 @@ class Domain extends Model
 
     /**
      * 查询缓存的Whois信息
+     *
      * @param string $domain
-     * @return false|Domain
+     * @return null|Domain
      */
-    public static function getDomainInfo(string $domain)
+    public static function getDomainInfo(string $domain): ?Domain
     {
         if (($info = static::where('name', $domain)->first()) != null) {
             return $info;
         }
-        return false;
+        return null;
     }
 
     /**
      * 获取缓存的总数
      * @param int $cacheMinutes
-     * @return mixed
+     * @return int
      */
-    public static function getTotal($cacheMinutes = 60)
+    public static function getTotal(int $cacheMinutes = 60): int
     {
         return Cache::remember(static::CACHE_TAG . 'total', Carbon::now()->addMinutes($cacheMinutes), function () {
-            return static::count();
+            return Domain::count();
         });
     }
 }

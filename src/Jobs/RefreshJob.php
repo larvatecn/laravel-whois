@@ -53,7 +53,7 @@ class RefreshJob implements ShouldQueue
      *
      * @return array
      */
-    public function backoff()
+    public function backoff(): array
     {
         return [3, 5, 15];
     }

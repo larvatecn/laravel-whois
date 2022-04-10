@@ -3,12 +3,10 @@
  * This is NOT a freeware, use is subject to license terms
  * @copyright Copyright (c) 2010-2099 Jinan Larva Information Technology Co., Ltd.
  * @link http://www.larva.com.cn/
- * @license http://www.larva.com.cn/license/
  */
 
 namespace Larva\Whois;
 
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Carbon;
 use Iodev\Whois\Exceptions\ConnectionException;
 use Iodev\Whois\Exceptions\ServerMismatchException;
@@ -26,32 +24,6 @@ use Pdp\Domain as WhoisDomain;
 class WhoisQuery
 {
     /**
-     * The container instance.
-     *
-     * @var \Illuminate\Contracts\Container\Container
-     */
-    protected $container;
-
-    /**
-     * The configuration repository instance.
-     *
-     * @var \Illuminate\Contracts\Config\Repository
-     */
-    protected $config;
-
-    /**
-     * Create a new manager instance.
-     *
-     * @param \Illuminate\Contracts\Container\Container $container
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-//    public function __construct(Container $container)
-//    {
-//        $this->container = $container;
-//        $this->config = $container->make('config');
-//    }
-
-    /**
      * 解析域名
      *
      * @param string $host
@@ -60,13 +32,13 @@ class WhoisQuery
      */
     public function parseDomain(string $host): ResolvedDomainName
     {
-        if (strpos($host, '://') !== false) {
+        if (str_contains($host, '://')) {
             $url = parse_url($host);
             if (isset ($url ['host'])) {
                 $host = $url ['host'];
             }
         }
-        if ($host && strpos($host, '.') !== false) {
+        if ($host && str_contains($host, '.')) {
             $publicSuffixList = Rules::fromPath(__DIR__ . '/../resources/public_suffix_list.dat');
             $domain = WhoisDomain::fromIDNA2008($host);
             return $publicSuffixList->resolve($domain);
@@ -119,7 +91,7 @@ class WhoisQuery
      * @throws ServerMismatchException
      * @throws WhoisException
      */
-    public function lookup(string $domain, $refresh = false): Domain
+    public function lookup(string $domain, bool $refresh = false): Domain
     {
         $domain = $this->parseDomain($domain);
         if ($refresh == false && ($info = Domain::getDomainInfo($domain->registrableDomain()->toString())) != false) {
