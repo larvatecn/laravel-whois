@@ -25,6 +25,8 @@ return new class extends Migration
             $table->timestamp('expiration_date')->nullable();
             $table->mediumText('raw_data')->comment('Raw Data');
             $table->timestamp('updated_at')->nullable();
+
+            $table->comment('域名 Whois 表');
         });
     }
 
