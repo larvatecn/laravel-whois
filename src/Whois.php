@@ -12,7 +12,7 @@ use Iodev\Whois\Modules\Tld\TldInfo;
 
 /**
  * Whois 查询
- * @method static Domain lookup(string $domain, $refresh = false)
+ * @method static array lookup(string $domain)
  * @method static string lookupRaw(string $domain)
  * @method static TldInfo lookupInfo(string $domain)
  * @mixin WhoisQuery

@@ -72,7 +72,7 @@ class WhoisQuery
      * @throws WhoisException
      * @throws IllegalDomainException
      */
-    public function lookupInfo($domain)
+    public function lookupInfo($domain): TldInfo
     {
         $whois = Factory::get()->createWhois();
         if (!$domain instanceof ResolvedDomainName) {
@@ -83,34 +83,26 @@ class WhoisQuery
 
     /**
      * 查询 Whois
-     * @param string $domain
-     * @param false $refresh
-     * @return Domain
+     * @param string $domain 要查询的域名
+     * @return array
      * @throws ConnectionException
      * @throws IllegalDomainException
      * @throws ServerMismatchException
      * @throws WhoisException
      */
-    public function lookup(string $domain, bool $refresh = false): Domain
+    public function lookup(string $domain): array
     {
-        $domain = $this->parseDomain($domain);
-        if ($refresh == false && ($info = Domain::getDomainInfo($domain->registrableDomain()->toString())) != false) {
-            return $info;
-        } else {
-            $response = $this->lookupInfo($domain);
-            if (($info = Domain::getDomainInfo($response->domainName)) == false) {
-                $info = new Domain(['name' => $response->domainName]);
-            }
-            $info->registrar = $response->registrar;
-            $info->owner = $response->owner;
-            $info->whois_server = $response->whoisServer;
-            $info->states = $response->states;
-            $info->name_servers = $response->nameServers;
-            $info->creation_date = Carbon::createFromTimestamp($response->creationDate);
-            $info->expiration_date = Carbon::createFromTimestamp($response->expirationDate);
-            $info->raw_data = $response->getResponse()->text;
-            $info->save();
-            return $info;
-        }
+        $response = $this->lookupInfo($this->parseDomain($domain));
+        return [
+            'name' => $response->domainName,
+            'registrar' => $response->registrar,
+            'owner' => $response->owner,
+            'whois_server' => $response->whoisServer,
+            'states' => $response->states,
+            'name_servers' => $response->nameServers,
+            'creation_date' => Carbon::createFromTimestamp($response->creationDate),
+            'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
+            'raw_data' => $response->getResponse()->text,
+        ];
     }
 }

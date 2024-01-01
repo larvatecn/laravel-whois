@@ -18,23 +18,11 @@ use Illuminate\Support\ServiceProvider;
 class WhoisServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        }
-    }
-
-    /**
      * Register the service provider.
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(WhoisQuery::class, function () {
             return new WhoisQuery();

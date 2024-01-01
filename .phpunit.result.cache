@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"Larva\\Whois\\Tests\\WhoisQueryTest::testParseDomain":0.343,"Larva\\Whois\\Tests\\WhoisQueryTest::testLookupRaw":1.604,"Larva\\Whois\\Tests\\WhoisQueryTest::testLookupInfo":1.045}}
