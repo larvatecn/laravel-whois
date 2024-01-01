@@ -94,14 +94,17 @@ class WhoisQuery
     {
         $response = $this->lookupInfo($this->parseDomain($domain));
         return [
+            'parser_type' => $response->parserType,
             'name' => $response->domainName,
             'registrar' => $response->registrar,
             'owner' => $response->owner,
             'whois_server' => $response->whoisServer,
             'states' => $response->states,
             'name_servers' => $response->nameServers,
+            'dnssec' => $response->dnssec,
             'creation_date' => Carbon::createFromTimestamp($response->creationDate),
             'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
+            'updated_date' => Carbon::createFromTimestamp($response->updatedDate),
             'response_raw' => $response->getResponse()->text,
         ];
     }
