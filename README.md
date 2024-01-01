@@ -23,6 +23,6 @@ composer require larva/laravel-whois -vv
 ## 使用
 
 ```php
-    $info = \Larva\Whois\Whois::lookup('baidu.com', true);
+    $info = \Larva\Whois\Whois::lookup('baidu.com');
     $info = \Larva\Whois\Whois::lookupRaw('google.com');
 ```
