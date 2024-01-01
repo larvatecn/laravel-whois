@@ -13,7 +13,6 @@ use Iodev\Whois\Exceptions\ServerMismatchException;
 use Iodev\Whois\Exceptions\WhoisException;
 use Iodev\Whois\Factory;
 use Iodev\Whois\Modules\Tld\TldInfo;
-use Iodev\Whois\Modules\Tld\TldServer;
 use Pdp\Domain as WhoisDomain;
 use Pdp\ResolvedDomainName;
 use Pdp\Rules;
@@ -105,27 +104,5 @@ class WhoisQuery
             'expiration_date' => Carbon::createFromTimestamp($response->expirationDate),
             'response_raw' => $response->getResponse()->text,
         ];
-    }
-
-    /**
-     * 查询域名
-     *
-     * @param $domain
-     * @param TldServer|null $server
-     * @return array
-     * @throws ConnectionException
-     * @throws ServerMismatchException
-     * @throws WhoisException
-     */
-    protected function lookupDomain($domain, ?TldServer $server = null): array
-    {
-        $tldModule = Factory::get()->createWhois()->getTldModule();
-        $servers = $server ? [$server] : $tldModule->matchServers($domain);
-        /** TldInfo */
-        [$response, $info] = $tldModule->loadDomainData($domain, $servers);
-        $result = $info->toArray();
-        $result['response_raw'] = $response->text;
-
-        return $result;
     }
 }
